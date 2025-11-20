@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from .models import AIModelProvider, TeamRole, LessonType
+from .models import AIModelProvider, TeamRole, LessonType, LessonStatus
 
 
 # User Schemas
@@ -29,6 +29,7 @@ class UserUpdate(BaseModel):
 class UserResponse(UserBase):
     id: int
     is_active: bool
+    is_admin: bool
     preferred_ai_model: AIModelProvider
     created_at: datetime
 
@@ -111,10 +112,45 @@ class LessonResponse(LessonBase):
     estimated_duration: Optional[int]
     tags: Optional[List[str]]
     is_active: bool
+    status: LessonStatus
+    created_by: Optional[int]
+    reviewed_by: Optional[int]
+    published_at: Optional[datetime]
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+# Admin Lesson Schemas
+class LessonGenerateRequest(BaseModel):
+    prompt: str
+    lesson_type: LessonType
+    ai_model: AIModelProvider = AIModelProvider.ANTHROPIC
+    additional_context: Optional[str] = None
+
+
+class LessonGenerateResponse(BaseModel):
+    lesson_id: int
+    title: str
+    status: LessonStatus
+    message: str
+
+
+class LessonRefineRequest(BaseModel):
+    refinement_prompt: str
+    ai_model: AIModelProvider = AIModelProvider.ANTHROPIC
+
+
+class LessonStatusUpdate(BaseModel):
+    status: LessonStatus
+    notes: Optional[str] = None
+
+
+class DocumentUpload(BaseModel):
+    filename: str
+    content_type: str
+    size: int
 
 
 # Chat Session Schemas

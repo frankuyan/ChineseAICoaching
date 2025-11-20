@@ -34,6 +34,14 @@ class LessonType(str, enum.Enum):
     CUSTOM = "custom"
 
 
+# Enum for lesson status (admin workflow)
+class LessonStatus(str, enum.Enum):
+    DRAFT = "draft"
+    IN_REVIEW = "in_review"
+    PUBLISHED = "published"
+    ARCHIVED = "archived"
+
+
 # Association table for user-team relationship
 user_teams = Table(
     'user_teams',
@@ -55,6 +63,7 @@ class User(Base):
     full_name = Column(String)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+    is_admin = Column(Boolean, default=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -66,6 +75,7 @@ class User(Base):
     sessions = relationship("ChatSession", back_populates="user", cascade="all, delete-orphan")
     teams = relationship("Team", secondary=user_teams, back_populates="members")
     progress_reports = relationship("ProgressReport", back_populates="user", cascade="all, delete-orphan")
+    created_lessons = relationship("Lesson", back_populates="created_by_user", foreign_keys="Lesson.created_by")
 
 
 class Team(Base):
@@ -100,6 +110,16 @@ class Lesson(Base):
     estimated_duration = Column(Integer)  # in minutes
     tags = Column(JSON)  # List of tags
 
+    # Admin workflow fields
+    status = Column(SQLEnum(LessonStatus), default=LessonStatus.DRAFT)
+    created_by = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    reviewed_by = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    published_at = Column(DateTime(timezone=True), nullable=True)
+
+    # AI generation metadata
+    generation_prompt = Column(Text)  # Prompt used to generate the lesson
+    source_documents = Column(JSON)  # List of source document references
+
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -107,6 +127,7 @@ class Lesson(Base):
     # Relationships
     sessions = relationship("ChatSession", back_populates="lesson")
     teams = relationship("Team", secondary="team_lessons", back_populates="shared_lessons")
+    created_by_user = relationship("User", back_populates="created_lessons", foreign_keys=[created_by])
 
 
 # Association table for team-lesson relationship

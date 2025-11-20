@@ -40,5 +40,10 @@ langchain-anthropic==0.1.1
 tiktoken==0.5.2
 numpy==1.26.3
 
+# Document Parsing
+pypdf==4.0.1
+python-docx==1.1.0
+openpyxl==3.1.2
+
 # Monitoring and Logging
 loguru==0.7.2

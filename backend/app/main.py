@@ -5,7 +5,7 @@ from loguru import logger
 
 from .config import settings
 from .database import async_engine, Base
-from .routers import auth, chat, lessons, teams, progress
+from .routers import auth, chat, lessons, teams, progress, admin_lessons
 
 
 @asynccontextmanager
@@ -43,6 +43,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(chat.router)
 app.include_router(lessons.router)
+app.include_router(admin_lessons.router)
 app.include_router(teams.router)
 app.include_router(progress.router)
 
