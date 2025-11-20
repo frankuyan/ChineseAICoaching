@@ -66,12 +66,13 @@ const useChatStore = create((set, get) => ({
     }
   },
 
-  sendMessage: async (content, sessionId = null) => {
+  sendMessage: async (content, sessionId = null, aiModel = null) => {
     set({ sending: true, error: null });
     try {
       const response = await chatAPI.sendMessage({
         message: content,
         session_id: sessionId,
+        ai_model: aiModel,
       });
 
       const { session_id, message, ai_response } = response.data;

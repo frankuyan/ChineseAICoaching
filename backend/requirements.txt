@@ -20,7 +20,7 @@ anthropic==0.18.1
 httpx==0.26.0
 
 # Vector Database
-chromadb==0.4.22
+chromadb==0.4.24
 
 # Authentication
 python-jose[cryptography]==3.3.0

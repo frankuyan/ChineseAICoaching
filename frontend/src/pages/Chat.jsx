@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Send, Plus, Trash2, CheckCircle } from 'lucide-react';
+import { Send, Plus, Trash2, CheckCircle, Bot } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { format } from 'date-fns';
 import useChatStore from '../store/chatStore';
@@ -24,7 +24,15 @@ const Chat = () => {
   } = useChatStore();
 
   const [inputMessage, setInputMessage] = useState('');
+  const [selectedModel, setSelectedModel] = useState('openai');
+  const [showModelSelector, setShowModelSelector] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const aiModels = [
+    { value: 'openai', label: 'OpenAI GPT-4', description: 'Most capable model' },
+    { value: 'deepseek', label: 'DeepSeek', description: 'Fast and efficient' },
+    { value: 'anthropic', label: 'Anthropic Claude', description: 'Constitutional AI' },
+  ];
 
   useEffect(() => {
     loadSessions();
@@ -51,11 +59,11 @@ const Chat = () => {
     const message = inputMessage;
     setInputMessage('');
 
-    await sendMessage(message, currentSession?.id);
+    await sendMessage(message, currentSession?.id, selectedModel);
   };
 
   const handleCreateSession = async () => {
-    await createSession({ title: 'New Chat Session' });
+    await createSession({ title: 'New Chat Session', ai_model: selectedModel });
   };
 
   const handleDeleteSession = async (id) => {
@@ -208,6 +216,41 @@ const Chat = () => {
 
             {/* Input */}
             <div className="bg-white border-t border-gray-200 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowModelSelector(!showModelSelector)}
+                    className="flex items-center space-x-2 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    <Bot className="w-4 h-4" />
+                    <span className="font-medium">
+                      {aiModels.find(m => m.value === selectedModel)?.label}
+                    </span>
+                  </button>
+                  {showModelSelector && (
+                    <div className="absolute bottom-full mb-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[250px] z-10">
+                      {aiModels.map((model) => (
+                        <button
+                          key={model.value}
+                          onClick={() => {
+                            setSelectedModel(model.value);
+                            setShowModelSelector(false);
+                          }}
+                          className={clsx(
+                            'w-full text-left px-3 py-2 rounded-md transition-colors',
+                            selectedModel === model.value
+                              ? 'bg-primary-50 text-primary-700'
+                              : 'hover:bg-gray-50'
+                          )}
+                        >
+                          <div className="font-medium">{model.label}</div>
+                          <div className="text-xs text-gray-500">{model.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
               <form onSubmit={handleSendMessage} className="flex space-x-4">
                 <input
                   type="text"

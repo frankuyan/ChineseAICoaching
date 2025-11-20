@@ -21,7 +21,11 @@ class VectorService:
             self._client = chromadb.HttpClient(
                 host=app_settings.CHROMA_HOST,
                 port=app_settings.CHROMA_PORT,
-                settings=Settings(allow_reset=True)
+                settings=Settings(
+                    chroma_client_auth_provider="chromadb.auth.token.TokenAuthClientProvider",
+                    chroma_client_auth_credentials="",
+                    allow_reset=True
+                )
             )
         return self._client
 
