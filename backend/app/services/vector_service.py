@@ -10,13 +10,20 @@ class VectorService:
     """Service for managing vector embeddings and semantic search using ChromaDB"""
 
     def __init__(self):
-        # Initialize ChromaDB client
-        self.client = chromadb.HttpClient(
-            host=app_settings.CHROMA_HOST,
-            port=app_settings.CHROMA_PORT,
-            settings=Settings(allow_reset=True)
-        )
+        # Lazy initialization - client will be created on first use
+        self._client = None
         self.default_collection_name = "coaching_sessions"
+
+    @property
+    def client(self):
+        """Lazy initialization of ChromaDB client"""
+        if self._client is None:
+            self._client = chromadb.HttpClient(
+                host=app_settings.CHROMA_HOST,
+                port=app_settings.CHROMA_PORT,
+                settings=Settings(allow_reset=True)
+            )
+        return self._client
 
     def get_or_create_collection(self, collection_name: str = None):
         """Get or create a collection"""

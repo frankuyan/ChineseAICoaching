@@ -50,10 +50,11 @@ services:
     ports:
       - "8000:8000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      test: ["CMD-SHELL", "timeout 1 bash -c '</dev/tcp/localhost/8000' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     networks:
       - aicoaching-network
 
@@ -95,6 +96,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: development
     container_name: aicoaching-frontend
     environment:
       - VITE_API_URL=http://localhost:8001
